@@ -7,6 +7,7 @@ from settlementregistry.models import (
     SettlementPolicyAssignment,
     SettlementPolicyVersion,
 )
+from settlementregistry.permissions_navigation import require_nav_access
 from settlementregistry.permissions import AdminOnlyAccess
 from settlementregistry.serializers import (
     SettlementPolicyAssignmentSerializer,
@@ -29,6 +30,14 @@ class SettlementPolicyViewSet(viewsets.ModelViewSet):
     lookup_field = "policy_id"
     permission_classes = [AdminOnlyAccess]
 
+    def list(self, request, *args, **kwargs):
+        require_nav_access(request, "settlements")
+        return super().list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        require_nav_access(request, "settlements")
+        return super().retrieve(request, *args, **kwargs)
+
 
 class SettlementPolicyVersionViewSet(viewsets.ModelViewSet):
     queryset = SettlementPolicyVersion.objects.select_related("policy").all()
@@ -36,9 +45,25 @@ class SettlementPolicyVersionViewSet(viewsets.ModelViewSet):
     lookup_field = "policy_version_id"
     permission_classes = [AdminOnlyAccess]
 
+    def list(self, request, *args, **kwargs):
+        require_nav_access(request, "settlements")
+        return super().list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        require_nav_access(request, "settlements")
+        return super().retrieve(request, *args, **kwargs)
+
 
 class SettlementPolicyAssignmentViewSet(viewsets.ModelViewSet):
     queryset = SettlementPolicyAssignment.objects.select_related("policy_version").all()
     serializer_class = SettlementPolicyAssignmentSerializer
     lookup_field = "assignment_id"
     permission_classes = [AdminOnlyAccess]
+
+    def list(self, request, *args, **kwargs):
+        require_nav_access(request, "settlements")
+        return super().list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        require_nav_access(request, "settlements")
+        return super().retrieve(request, *args, **kwargs)

@@ -18,10 +18,10 @@ from settlementregistry.services.source_clients import SourceValidationError
 class SettlementRegistryApiTests(TestCase):
     def setUp(self) -> None:
         self.client = APIClient()
-        self.admin_token = self._issue_token("admin")
+        self.admin_token = self._issue_token("admin", allowed_nav_keys=["settlements"])
         self.user_token = self._issue_token("user")
 
-    def _issue_token(self, role: str) -> str:
+    def _issue_token(self, role: str, *, allowed_nav_keys: list[str] | None = None) -> str:
         now = datetime.now(timezone.utc)
         payload = {
             "sub": str(uuid4()),
@@ -34,6 +34,8 @@ class SettlementRegistryApiTests(TestCase):
             "jti": str(uuid4()),
             "type": "access",
         }
+        if allowed_nav_keys is not None:
+            payload["allowed_nav_keys"] = allowed_nav_keys
         return jwt.encode(payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
 
     def _authenticate(self, token: str) -> None:
@@ -337,3 +339,20 @@ class SettlementRegistryApiTests(TestCase):
 
         self.assertEqual(response.status_code, 400)
         self.assertIn("fleet_id", response.data["details"])
+
+    def test_admin_without_settlements_nav_key_cannot_list_policies(self):
+        self._authenticate(self._issue_token("admin", allowed_nav_keys=[]))
+
+        response = self.client.get("/policies/")
+
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(set(response.data.keys()), {"code", "message", "details"})
+
+    def test_admin_without_settlements_nav_key_cannot_read_policy_detail(self):
+        policy = self._create_policy()
+        self._authenticate(self._issue_token("admin", allowed_nav_keys=[]))
+
+        response = self.client.get(f"/policies/{policy.policy_id}/")
+
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(set(response.data.keys()), {"code", "message", "details"})
