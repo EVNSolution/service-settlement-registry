@@ -1,4 +1,5 @@
 from datetime import date
+from decimal import Decimal
 import uuid
 
 from django.core.exceptions import ValidationError
@@ -115,3 +116,40 @@ class SettlementPolicyAssignment(models.Model):
         current_end = self.effective_end_date or date.max
         other_end = other.effective_end_date or date.max
         return self.effective_start_date < other_end and other.effective_start_date < current_end
+
+
+class GlobalSettlementConfig(models.Model):
+    singleton_key = models.CharField(max_length=32, unique=True, default="global")
+    income_tax_rate = models.DecimalField(max_digits=8, decimal_places=4, default=Decimal("0.0000"))
+    vat_tax_rate = models.DecimalField(max_digits=8, decimal_places=4, default=Decimal("0.0000"))
+    reported_amount_rate = models.DecimalField(max_digits=8, decimal_places=4, default=Decimal("0.0000"))
+    national_pension_rate = models.DecimalField(max_digits=8, decimal_places=4, default=Decimal("0.0000"))
+    health_insurance_rate = models.DecimalField(max_digits=8, decimal_places=4, default=Decimal("0.0000"))
+    medical_insurance_rate = models.DecimalField(max_digits=8, decimal_places=4, default=Decimal("0.0000"))
+    employment_insurance_rate = models.DecimalField(max_digits=8, decimal_places=4, default=Decimal("0.0000"))
+    industrial_accident_insurance_rate = models.DecimalField(
+        max_digits=8,
+        decimal_places=4,
+        default=Decimal("0.0000"),
+    )
+    special_employment_insurance_rate = models.DecimalField(
+        max_digits=8,
+        decimal_places=4,
+        default=Decimal("0.0000"),
+    )
+    special_industrial_accident_insurance_rate = models.DecimalField(
+        max_digits=8,
+        decimal_places=4,
+        default=Decimal("0.0000"),
+    )
+    two_insurance_min_settlement_amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=4,
+        default=Decimal("0.0000"),
+    )
+    meal_allowance = models.DecimalField(max_digits=12, decimal_places=4, default=Decimal("0.0000"))
+
+    @classmethod
+    def load(cls):
+        config, _ = cls.objects.get_or_create(singleton_key="global")
+        return config

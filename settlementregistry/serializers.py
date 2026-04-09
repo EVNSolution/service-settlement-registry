@@ -6,6 +6,7 @@ from settlementregistry.models import (
     SettlementPolicy,
     SettlementPolicyAssignment,
     SettlementPolicyVersion,
+    GlobalSettlementConfig,
 )
 from settlementregistry.services.source_clients import SourceClients, SourceServiceError, SourceValidationError
 
@@ -104,4 +105,37 @@ class SettlementPolicyAssignmentSerializer(serializers.ModelSerializer):
             if "policy_version" in errors:
                 errors["policy_version_id"] = errors.pop("policy_version")
             raise serializers.ValidationError(errors) from exc
+        return attrs
+
+
+class GlobalSettlementConfigSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GlobalSettlementConfig
+        fields = (
+            "singleton_key",
+            "income_tax_rate",
+            "vat_tax_rate",
+            "reported_amount_rate",
+            "national_pension_rate",
+            "health_insurance_rate",
+            "medical_insurance_rate",
+            "employment_insurance_rate",
+            "industrial_accident_insurance_rate",
+            "special_employment_insurance_rate",
+            "special_industrial_accident_insurance_rate",
+            "two_insurance_min_settlement_amount",
+            "meal_allowance",
+        )
+        read_only_fields = ("singleton_key",)
+
+    def validate(self, attrs):
+        candidate = self.instance or GlobalSettlementConfig.load()
+        for field, value in attrs.items():
+            setattr(candidate, field, value)
+
+        try:
+            candidate.full_clean()
+        except DjangoValidationError as exc:
+            raise serializers.ValidationError(dict(exc.message_dict)) from exc
+
         return attrs

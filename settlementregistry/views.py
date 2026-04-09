@@ -6,13 +6,16 @@ from settlementregistry.models import (
     SettlementPolicy,
     SettlementPolicyAssignment,
     SettlementPolicyVersion,
+    GlobalSettlementConfig,
 )
 from settlementregistry.permissions_navigation import require_nav_access
 from settlementregistry.permissions import AdminOnlyAccess
+from settlementregistry.settlement_config_metadata import SETTLEMENT_CONFIG_METADATA
 from settlementregistry.serializers import (
     SettlementPolicyAssignmentSerializer,
     SettlementPolicySerializer,
     SettlementPolicyVersionSerializer,
+    GlobalSettlementConfigSerializer,
 )
 
 
@@ -22,6 +25,32 @@ class HealthView(APIView):
 
     def get(self, request):
         return Response({"status": "ok"})
+
+
+class SettlementConfigMetadataView(APIView):
+    permission_classes = [AdminOnlyAccess]
+
+    def get(self, request):
+        require_nav_access(request, "settlements")
+        return Response(SETTLEMENT_CONFIG_METADATA)
+
+
+class SettlementConfigView(APIView):
+    permission_classes = [AdminOnlyAccess]
+
+    def get(self, request):
+        require_nav_access(request, "settlements")
+        config = GlobalSettlementConfig.load()
+        serializer = GlobalSettlementConfigSerializer(config)
+        return Response(serializer.data)
+
+    def patch(self, request):
+        require_nav_access(request, "settlements")
+        config = GlobalSettlementConfig.load()
+        serializer = GlobalSettlementConfigSerializer(config, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
 
 
 class SettlementPolicyViewSet(viewsets.ModelViewSet):

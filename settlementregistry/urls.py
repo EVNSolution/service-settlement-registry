@@ -3,6 +3,8 @@ from rest_framework.routers import SimpleRouter
 
 from settlementregistry.views import (
     HealthView,
+    SettlementConfigMetadataView,
+    SettlementConfigView,
     SettlementPolicyAssignmentViewSet,
     SettlementPolicyVersionViewSet,
     SettlementPolicyViewSet,
@@ -15,5 +17,7 @@ router.register("policy-assignments", SettlementPolicyAssignmentViewSet, basenam
 
 urlpatterns = [
     path("", include(router.urls)),
+    path("settlement-config/metadata/", SettlementConfigMetadataView.as_view()),
+    path("settlement-config/", SettlementConfigView.as_view()),
     path("health/", HealthView.as_view()),
 ]

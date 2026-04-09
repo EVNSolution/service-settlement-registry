@@ -46,6 +46,9 @@ class SeedSettlementRegistryCommandTests(TestCase):
         self.assertEqual(str(assignment.fleet_id), "40000000-0000-0000-0000-000000000001")
         self.assertEqual(assignment.effective_start_date, date(2026, 3, 24))
         self.assertIsNone(assignment.effective_end_date)
+        config = models_module.GlobalSettlementConfig.objects.get(singleton_key="global")
+        self.assertEqual(str(config.income_tax_rate), "0.0000")
+        self.assertEqual(str(config.meal_allowance), "0.0000")
 
     def test_seed_command_is_idempotent(self):
         models_module = _load_models_module(self)

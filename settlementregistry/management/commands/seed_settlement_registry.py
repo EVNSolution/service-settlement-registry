@@ -7,6 +7,7 @@ from settlementregistry.models import (
     SettlementPolicy,
     SettlementPolicyAssignment,
     SettlementPolicyVersion,
+    GlobalSettlementConfig,
 )
 
 SAMPLE_POLICY_ID = UUID("83000000-0000-0000-0000-000000000001")
@@ -50,4 +51,5 @@ class Command(BaseCommand):
                 "status": SettlementPolicyAssignment.Status.ACTIVE,
             },
         )
+        GlobalSettlementConfig.objects.get_or_create(singleton_key="global")
         self.stdout.write(self.style.SUCCESS("Seeded settlement registry bootstrap data."))
