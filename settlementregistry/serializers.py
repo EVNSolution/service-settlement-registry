@@ -3,6 +3,7 @@ from rest_framework import serializers
 
 from settlementregistry.exceptions import ServiceUnavailableError
 from settlementregistry.models import (
+    CompanyFleetPricingTable,
     SettlementPolicy,
     SettlementPolicyAssignment,
     SettlementPolicyVersion,
@@ -138,4 +139,41 @@ class GlobalSettlementConfigSerializer(serializers.ModelSerializer):
         except DjangoValidationError as exc:
             raise serializers.ValidationError(dict(exc.message_dict)) from exc
 
+        return attrs
+
+
+class CompanyFleetPricingTableSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CompanyFleetPricingTable
+        fields = (
+            "pricing_table_id",
+            "company_id",
+            "fleet_id",
+            "box_sale_unit_price",
+            "box_purchase_unit_price",
+            "overtime_fee",
+        )
+        read_only_fields = ("pricing_table_id",)
+
+    def validate(self, attrs):
+        candidate = self.instance or CompanyFleetPricingTable()
+        for field, value in attrs.items():
+            setattr(candidate, field, value)
+
+        request = self.context.get("request")
+        authorization = request.headers.get("Authorization", "") if request else ""
+
+        try:
+            SourceClients().validate_company_fleet_scope(
+                company_id=str(candidate.company_id),
+                fleet_id=str(candidate.fleet_id),
+                authorization=authorization,
+            )
+            candidate.full_clean()
+        except SourceValidationError as exc:
+            raise serializers.ValidationError({exc.field: [exc.message]}) from exc
+        except SourceServiceError as exc:
+            raise ServiceUnavailableError(str(exc)) from exc
+        except DjangoValidationError as exc:
+            raise serializers.ValidationError(dict(exc.message_dict)) from exc
         return attrs

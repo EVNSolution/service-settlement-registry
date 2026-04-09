@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from settlementregistry.models import (
+    CompanyFleetPricingTable,
     SettlementPolicy,
     SettlementPolicyAssignment,
     SettlementPolicyVersion,
@@ -12,6 +13,7 @@ from settlementregistry.permissions_navigation import require_nav_access
 from settlementregistry.permissions import AdminOnlyAccess
 from settlementregistry.settlement_config_metadata import SETTLEMENT_CONFIG_METADATA
 from settlementregistry.serializers import (
+    CompanyFleetPricingTableSerializer,
     SettlementPolicyAssignmentSerializer,
     SettlementPolicySerializer,
     SettlementPolicyVersionSerializer,
@@ -96,3 +98,24 @@ class SettlementPolicyAssignmentViewSet(viewsets.ModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         require_nav_access(request, "settlements")
         return super().retrieve(request, *args, **kwargs)
+
+
+class CompanyFleetPricingTableViewSet(viewsets.ModelViewSet):
+    queryset = CompanyFleetPricingTable.objects.all()
+    serializer_class = CompanyFleetPricingTableSerializer
+    lookup_field = "pricing_table_id"
+    permission_classes = [AdminOnlyAccess]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        company_id = self.request.query_params.get("company_id")
+        fleet_id = self.request.query_params.get("fleet_id")
+        if company_id:
+            queryset = queryset.filter(company_id=company_id)
+        if fleet_id:
+            queryset = queryset.filter(fleet_id=fleet_id)
+        return queryset
+
+    def initial(self, request, *args, **kwargs):
+        super().initial(request, *args, **kwargs)
+        require_nav_access(request, "settlements")

@@ -4,6 +4,7 @@ from uuid import UUID
 from django.core.management.base import BaseCommand
 
 from settlementregistry.models import (
+    CompanyFleetPricingTable,
     SettlementPolicy,
     SettlementPolicyAssignment,
     SettlementPolicyVersion,
@@ -49,6 +50,15 @@ class Command(BaseCommand):
                 "effective_start_date": date(2026, 3, 24),
                 "effective_end_date": None,
                 "status": SettlementPolicyAssignment.Status.ACTIVE,
+            },
+        )
+        CompanyFleetPricingTable.objects.update_or_create(
+            company_id=SAMPLE_COMPANY_ID,
+            fleet_id=SAMPLE_FLEET_ID,
+            defaults={
+                "box_sale_unit_price": "1000.00",
+                "box_purchase_unit_price": "800.00",
+                "overtime_fee": "20000.00",
             },
         )
         GlobalSettlementConfig.objects.get_or_create(singleton_key="global")

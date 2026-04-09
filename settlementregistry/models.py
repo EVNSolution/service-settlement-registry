@@ -153,3 +153,21 @@ class GlobalSettlementConfig(models.Model):
     def load(cls):
         config, _ = cls.objects.get_or_create(singleton_key="global")
         return config
+
+
+class CompanyFleetPricingTable(models.Model):
+    pricing_table_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    company_id = models.UUIDField()
+    fleet_id = models.UUIDField()
+    box_sale_unit_price = models.DecimalField(max_digits=12, decimal_places=2)
+    box_purchase_unit_price = models.DecimalField(max_digits=12, decimal_places=2)
+    overtime_fee = models.DecimalField(max_digits=12, decimal_places=2)
+
+    class Meta:
+        ordering = ("pricing_table_id",)
+        constraints = [
+            models.UniqueConstraint(
+                fields=("company_id", "fleet_id"),
+                name="unique_company_fleet_pricing_table",
+            )
+        ]
