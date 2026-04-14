@@ -20,6 +20,8 @@
 - internal path: `/policies/`
 - internal path: `/policy-versions/`
 - internal path: `/policy-assignments/`
+- internal path: `/settlement-config/metadata/`
+- internal path: `/settlement-config/`
 - gateway prefix: `/api/settlement-registry/`
 
 아직 포함하지 않음:
@@ -28,6 +30,10 @@
 - company-only precedence
 - driver override
 - simulation / dry-run
+
+외부 smoke 기준:
+- `/api/settlement-registry/health/`
+- `/api/settlement-registry/settlement-config/metadata/`
 
 현재 정본:
 - `../../docs/mappings/`
