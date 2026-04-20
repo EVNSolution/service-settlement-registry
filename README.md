@@ -65,3 +65,9 @@
 - `../../docs/decisions/specs/2026-03-24-settlement-registry-phase-1-activation-design.md`
 - `../../docs/archive/historical/rollout/2026-03-20-settlement-phase-1-decomposition-implementation-plan.md`
 - `../../docs/archive/historical/rollout/2026-03-24-settlement-registry-phase-1-activation-implementation-plan.md`
+
+## Root Development Whitelist
+
+- 이 repo는 `clever-msa-platform` root `development/` whitelist에 포함된다.
+- root visible set은 `front-web-console`, `edge-api-gateway`, `runtime-prod-release`, `runtime-prod-platform`, active `service-*` repo만 유지한다.
+- local stack support repo, legacy infra repo, bridge lane repo는 root `development/` whitelist 바깥에서 관리한다.
